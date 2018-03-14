@@ -11,7 +11,7 @@ object RemoteUrl {
         val httpsUrl = raw"https://([^/]*)/([^/]*)/([^/]*).git".r
         val sshUrl = raw"([^@]*)@([^:]*):([^/]*)/([^/]*).git".r
 
-        str.toLowerCase.trim match {
+        str.toLowerCase match {
             case httpsUrl(domain, owner, repo) => Right(RemoteUrl(str, domain, owner, repo))
             case sshUrl(user, domain, owner, repo) => Right(RemoteUrl(str, domain, owner, repo))
             case _ => Left(new RuntimeException(s"String not a valid git url: $str"))
@@ -26,11 +26,16 @@ case object Git {
         val bash = s"git config --get remote.$remoteName.url"
 
         for {
-            remoteUrlString <- Try(bash !!).toEither
+            remoteUrlString <- Try(bash !!).toEither.map(_.trim)
             remoteUrl <- RemoteUrl.fromString(remoteUrlString)
         } yield {
             remoteUrl
         }
+    }
+
+    def getHeadSha(): Either[Throwable, String] = {
+        val bash = s"git rev-parse HEAD"
+        Try(bash !!).toEither.map(_.trim)
     }
 
 }

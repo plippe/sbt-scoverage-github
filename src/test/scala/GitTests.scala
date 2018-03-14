@@ -28,5 +28,9 @@ object GitTests extends TestSuite {
             assert(Git.getRemoteUrl("bad").isLeft)
         }
 
+        'testGitGetHeadSha - {
+            assert(Git.getHeadSha().isRight)
+        }
+
     }
 }
