@@ -1,0 +1,19 @@
+<scoverage>
+    <packages>
+        <package>
+            <classes>
+                <class>
+                    <methods>
+                        <method>
+                            <statements>
+                                <statement start="1" end="1" line="1" branch="false" invocation-count="0" ignored="false"></statement>
+                                <statement start="1" end="1" line="1" branch="false" invocation-count="1" ignored="false"></statement>
+                                <statement start="1" end="1" line="1" branch="false" invocation-count="1" ignored="false"></statement>
+                            </statements>
+                        </method>
+                    </methods>
+                </class>
+            </classes>
+        </package>
+    </packages>
+</scoverage>
