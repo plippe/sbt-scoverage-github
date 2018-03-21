@@ -31,7 +31,7 @@ object Main {
                 .traverse(M.fromEither)
 
             report = NamedCoverages.render(namedCoverages.toArray, Comment.maxWidth)
-            comment = Comment(report)
+            comment = Comment(s"```\n$report\n```")
 
             gitRemoteUrl <- M.fromEither(Git.remoteUrl("origin"))
             gitHeadSha <- M.fromEither(Git.headSha)
