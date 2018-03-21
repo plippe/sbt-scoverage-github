@@ -20,16 +20,16 @@ object GitTests extends TestSuite {
             assert(RemoteUrl.fromString(url).isLeft)
         }
 
-        'testGitGetRemoteUrlOrigin - {
-            assert(Git.getRemoteUrl("origin").isRight)
+        'testGitRemoteUrlOrigin - {
+            assert(Git.remoteUrl("origin").isRight)
         }
 
-        'testGitGetRemoteUrlBad - {
-            assert(Git.getRemoteUrl("bad").isLeft)
+        'testGitRemoteUrlBad - {
+            assert(Git.remoteUrl("bad").isLeft)
         }
 
-        'testGitGetHeadSha - {
-            assert(Git.getHeadSha().isRight)
+        'testGitHeadSha - {
+            assert(Git.headSha().isRight)
         }
 
     }

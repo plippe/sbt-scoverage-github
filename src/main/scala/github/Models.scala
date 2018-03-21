@@ -8,3 +8,7 @@ case class PullRequest(
 case class Head(sha: String)
 
 case class Comment(body: String)
+
+object Comment {
+    val maxWidth = 88
+}

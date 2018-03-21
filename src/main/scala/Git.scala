@@ -3,7 +3,7 @@ package com.github.plippe
 import sys.process._
 import scala.util.Try
 
-case class RemoteUrl(url: String, domain: String, owner: String, repo: String)
+case class RemoteUrl(url: String, domain: String, owner: String, repository: String)
 
 object RemoteUrl {
 
@@ -22,7 +22,7 @@ object RemoteUrl {
 
 case object Git {
 
-    def getRemoteUrl(remoteName: String): Either[Throwable, RemoteUrl] = {
+    def remoteUrl(remoteName: String): Either[Throwable, RemoteUrl] = {
         val bash = s"git config --get remote.$remoteName.url"
 
         for {
@@ -33,7 +33,7 @@ case object Git {
         }
     }
 
-    def getHeadSha(): Either[Throwable, String] = {
+    def headSha(): Either[Throwable, String] = {
         val bash = s"git rev-parse HEAD"
         Try(bash !!).toEither.map(_.trim)
     }
