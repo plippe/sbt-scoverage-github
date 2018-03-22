@@ -1,6 +1,7 @@
 package com.github.plippe
 
 import cats._
+import cats.data._
 import cats.effect._
 import cats.implicits._
 import java.io.File
@@ -8,29 +9,36 @@ import java.util.NoSuchElementException
 import org.http4s.client.blaze.Http1Client
 import scala.concurrent.ExecutionContext
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.util.Properties
 
 import com.github.plippe.github._
 
 object Main {
     def main(args: Array[String]): Unit = {
-        val namedFiles = Map(
-            "A" -> new File("src/main/resources/scoverage.a.xml"),
-            "B" -> new File("src/main/resources/scoverage.b.xml"),
-            "C" -> new File("src/main/resources/scoverage.empty.xml")
+        val namedFiles = NonEmptyList.fromListUnsafe(
+            List(
+                ("A", new File("src/main/resources/scoverage.a.xml")),
+                ("B", new File("src/main/resources/scoverage.b.xml")),
+                ("C", new File("src/main/resources/scoverage.empty.xml"))
+            )
         )
 
-        val gitHubToken = System.getenv("GITHUB_TOKEN")
+        val optGitHubToken = Properties.envOrNone("GITHUB_TOKEN")
+        val result = optGitHubToken match {
+            case Some(gitHubToken) => run[IO](namedFiles, gitHubToken)
+            case None => IO.raiseError(new NoSuchElementException(s"No GitHub token found"))
+        }
 
-        run[IO](namedFiles, gitHubToken).unsafeRunSync
+        result.unsafeRunSync
     }
 
-    def run[F[_]](namedFiles: Map[String, File], gitHubToken: String)(implicit ec: ExecutionContext, M: MonadError[F, Throwable], E: Effect[F]): F[Boolean] = {
+    def run[F[_]](namedFiles: NonEmptyList[(String, File)], gitHubToken: String)(implicit ec: ExecutionContext, M: MonadError[F, Throwable], E: Effect[F]): F[Boolean] = {
         for {
-            namedCoverages <- namedFiles.toList
+            namedCoverages <- namedFiles
                 .map { case (n, f) => ScoverageXmlReader.read(f).map { c => NamedCoverage(n, c) } }
                 .traverse(M.fromEither)
 
-            report = NamedCoverages.render(namedCoverages.toArray, Comment.maxWidth)
+            report = NamedCoverages.render(namedCoverages, Comment.maxWidth)
             comment = Comment(s"```\n$report\n```")
 
             gitRemoteUrl <- M.fromEither(Git.remoteUrl("origin"))
