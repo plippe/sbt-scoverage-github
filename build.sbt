@@ -12,7 +12,7 @@ enablePlugins(GitVersioning)
 scalaVersion := "2.12.4"
 crossSbtVersions := Vector("0.13.17", "1.1.1")
 
-val github4sVersion = "0.18.3"
+val github4sVersion = "0.15.0" // java.lang.AbstractMethodError for anything above
 val utestVersion = "0.6.3"
 val sbtSCoverageVersion = "1.5.1"
 
