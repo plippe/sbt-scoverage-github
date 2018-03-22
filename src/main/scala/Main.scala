@@ -1,58 +1,68 @@
 package com.github.plippe
 
 import cats._
-import cats.data._
-import cats.effect._
-import cats.implicits._
+import github4s.Github
+import github4s.Github._
+import github4s.free.domain.PRFilterOpen
+import github4s.jvm.Implicits._
 import java.io.File
 import java.util.NoSuchElementException
-import org.http4s.client.blaze.Http1Client
 import scala.concurrent.ExecutionContext
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.Properties
-
-import com.github.plippe.github._
+import scalaj.http.HttpResponse
 
 object Main {
     def main(args: Array[String]): Unit = {
-        val namedFiles = NonEmptyList.fromListUnsafe(
-            List(
-                ("A", new File("src/main/resources/scoverage.a.xml")),
-                ("B", new File("src/main/resources/scoverage.b.xml")),
-                ("C", new File("src/main/resources/scoverage.empty.xml"))
-            )
+        val namedFiles = Map(
+            "A" -> new File("src/main/resources/scoverage.a.xml"),
+            "B" -> new File("src/main/resources/scoverage.b.xml"),
+            "C" -> new File("src/main/resources/scoverage.empty.xml")
         )
 
-        val optGitHubToken = Properties.envOrNone("GITHUB_TOKEN")
-        val result = optGitHubToken match {
-            case Some(gitHubToken) => run[IO](namedFiles, gitHubToken)
-            case None => IO.raiseError(new NoSuchElementException(s"No GitHub token found"))
-        }
+        val gitRemoteName = "origin"
 
-        result.unsafeRunSync
+        val optGitHubToken = Properties.envOrNone("GITHUB_TOKEN")
+
+        val result = run(namedFiles, gitRemoteName, optGitHubToken)
+        result match {
+            case Right(succ) => println("Success")
+            case Left(err) => throw err
+        }
     }
 
-    def run[F[_]](namedFiles: NonEmptyList[(String, File)], gitHubToken: String)(implicit ec: ExecutionContext, M: MonadError[F, Throwable], E: Effect[F]): F[Boolean] = {
+    def flatten[A, E](list: List[Either[E, A]]): Either[E, List[A]] = {
+        val initial: Either[E, List[A]] = Right(List.empty)
+
+        list.foldLeft(initial) {
+            case (Right(list), Right(el)) => Right(list :+ el)
+            case (err@Left(_), _) => err
+            case (_, Left(err)) => Left(err)
+        }
+    }
+
+    def run(namedFiles: Map[String, File], gitRemoteName: String, optGitHubToken: Option[String]): Either[Throwable, Boolean] = {
+        val gitHubCommentMaxWidth = 88
+
         for {
-            namedCoverages <- namedFiles
-                .map { case (n, f) => ScoverageXmlReader.read(f).map { c => NamedCoverage(n, c) } }
-                .traverse(M.fromEither)
+            coverages <- flatten(namedFiles.values.map(ScoverageXmlReader.read).toList)
+            namedCoverages = namedFiles.keys.zip(coverages).map { case (n, c) => NamedCoverage(n, c) }
 
-            report = NamedCoverages.render(namedCoverages, Comment.maxWidth)
-            comment = Comment(s"```\n$report\n```")
+            report = NamedCoverages.render(namedCoverages.toArray, gitHubCommentMaxWidth)
+            reportAsCode = s"```\n$report\n```"
 
-            gitRemoteUrl <- M.fromEither(Git.remoteUrl("origin"))
-            gitHeadSha <- M.fromEither(Git.headSha)
+            gitRemoteUrl <- Git.remoteUrl(gitRemoteName)
+            gitHeadSha <- Git.headSha
 
-            http4sClient <- Http1Client[F]()
-            httpClient = HttpClientHttp4s[F](http4sClient)
-            gitHubClient =  GitHubClientCirce[F](httpClient, gitHubToken)
+            gitHubClient = Github(optGitHubToken)
 
-            gitHubPullRequests <- gitHubClient.listPullRequests(gitRemoteUrl.owner, gitRemoteUrl.repository)
-            gitHubPullRequest <- gitHubPullRequests.find(_.head.sha == gitHeadSha)
-                .fold(M.raiseError[PullRequest](new NoSuchElementException(s"No pull request with head sha $gitHeadSha")))(M.pure)
+            gitHubPullRequests <- gitHubClient.pullRequests.list(gitRemoteUrl.owner, gitRemoteUrl.repository, List(PRFilterOpen))
+                .exec[Id, HttpResponse[String]]()
+            gitHubPullRequest <- gitHubPullRequests.result.find(_.head.exists(_.sha == gitHeadSha))
+                .toRight(new NoSuchElementException(s"No pull request with head sha $gitHeadSha"))
 
-            _ <- gitHubClient.postComment(gitRemoteUrl.owner, gitRemoteUrl.repository, gitHubPullRequest.number, comment)
+            _ <- gitHubClient.issues.createComment(gitRemoteUrl.owner, gitRemoteUrl.repository, gitHubPullRequest.number, reportAsCode)
+                .exec[Id, HttpResponse[String]]()
         } yield true
     }
 }

@@ -23,12 +23,10 @@ object ScoverageTests extends TestSuite {
                 ScoverageXmlReader.read(file).right.get
             }
 
-            val coverages = NonEmptyList.fromListUnsafe(
-                List(
-                    NamedCoverage("a", coverage("/scoverage.a.xml")),
-                    NamedCoverage("b", coverage("/scoverage.b.xml")),
-                    NamedCoverage("c", coverage("/scoverage.empty.xml"))
-                )
+            val coverages = Array(
+                NamedCoverage("a", coverage("/scoverage.a.xml")),
+                NamedCoverage("b", coverage("/scoverage.b.xml")),
+                NamedCoverage("c", coverage("/scoverage.empty.xml"))
             )
 
             assert(NamedCoverages.render(coverages, 50).replace(" ", "_") ==
