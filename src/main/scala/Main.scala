@@ -14,9 +14,9 @@ import com.github.plippe.github._
 object Main {
     def main(args: Array[String]): Unit = {
         val namedFiles = Map(
-            "A" -> new File("/Users/pvinchon/Code/sbt-scoverage-github/src/test/resources/scoverage.a.xml"),
-            "B" -> new File("/Users/pvinchon/Code/sbt-scoverage-github/src/test/resources/scoverage.b.xml"),
-            "C" -> new File("/Users/pvinchon/Code/sbt-scoverage-github/src/test/resources/scoverage.empty.xml")
+            "A" -> new File("src/main/resources/scoverage.a.xml"),
+            "B" -> new File("src/main/resources/scoverage.b.xml"),
+            "C" -> new File("src/main/resources/scoverage.empty.xml")
         )
 
         val gitHubToken = System.getenv("GITHUB_TOKEN")
