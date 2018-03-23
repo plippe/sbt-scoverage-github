@@ -12,8 +12,17 @@ build:
 
     - script:
         name: build
-        code: sbt compile
+        code: make build
 
     - script:
         name: test
-        code: sbt test
+        code: make test
+
+    - script:
+        name: release
+        code: |
+          if [ "$WERCKER_GIT_BRANCH" == "master" ]; then
+            make release
+          else
+            echo Branch $WERCKER_GIT_BRANCH, nothing to do
+          fi
