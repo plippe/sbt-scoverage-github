@@ -52,16 +52,17 @@ object Main {
             reportAsCode = s"```\n$report\n```"
 
             gitRemoteUrl <- Git.remoteUrl(gitRemoteName)
+            gitHubRemoteUrl <- GitHubRemoteUrl.fromString(gitRemoteUrl)
             gitHeadSha <- Git.headSha
 
             gitHubClient = Github(optGitHubToken)
 
-            gitHubPullRequests <- gitHubClient.pullRequests.list(gitRemoteUrl.owner, gitRemoteUrl.repository, List(PRFilterOpen))
+            gitHubPullRequests <- gitHubClient.pullRequests.list(gitHubRemoteUrl.owner, gitHubRemoteUrl.repository, List(PRFilterOpen))
                 .exec[Id, HttpResponse[String]]()
             gitHubPullRequest <- gitHubPullRequests.result.find(_.head.exists(_.sha == gitHeadSha))
                 .toRight(new NoSuchElementException(s"No pull request with head sha $gitHeadSha"))
 
-            _ <- gitHubClient.issues.createComment(gitRemoteUrl.owner, gitRemoteUrl.repository, gitHubPullRequest.number, reportAsCode)
+            _ <- gitHubClient.issues.createComment(gitHubRemoteUrl.owner, gitHubRemoteUrl.repository, gitHubPullRequest.number, reportAsCode)
                 .exec[Id, HttpResponse[String]]()
         } yield true
     }
