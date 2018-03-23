@@ -7,17 +7,22 @@ object GitTests extends TestSuite {
 
         'testRemoteUrlFromHttps - {
             val url = "https://github.com/plippe/sbt-scoverage-github.git"
-            assert(RemoteUrl.fromString(url) == Right(RemoteUrl(url, "github.com", "plippe", "sbt-scoverage-github")))
+            assert(GitHubRemoteUrl.fromString(url) == Right(GitHubRemoteUrl("plippe", "sbt-scoverage-github")))
+        }
+
+        'testRemoteUrlFromHttpsWithoutExtension - {
+            val url = "https://github.com/plippe/sbt-scoverage-github"
+            assert(GitHubRemoteUrl.fromString(url) == Right(GitHubRemoteUrl("plippe", "sbt-scoverage-github")))
         }
 
         'testRemoteUrlFromSsh - {
             val url = "git@github.com:plippe/sbt-scoverage-github.git"
-            assert(RemoteUrl.fromString(url) == Right(RemoteUrl(url, "github.com", "plippe", "sbt-scoverage-github")))
+            assert(GitHubRemoteUrl.fromString(url) == Right(GitHubRemoteUrl("plippe", "sbt-scoverage-github")))
         }
 
         'testRemoteUrlFromBad - {
             val url = "not a valid url"
-            assert(RemoteUrl.fromString(url).isLeft)
+            assert(GitHubRemoteUrl.fromString(url).isLeft)
         }
 
         'testGitRemoteUrlOrigin - {
