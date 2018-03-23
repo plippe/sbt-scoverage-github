@@ -1,7 +1,7 @@
 # sbt-scoverage-github
 
 [![Build Status](https://app.wercker.com/status/8771cc6d453d68d69b7f700810a7eb21/s/master)](https://app.wercker.com/project/byKey/8771cc6d453d68d69b7f700810a7eb21)
-[ ![Version](https://api.bintray.com/packages/plippe/sbt/sbt-scoverage-github/images/download.svg)][https://bintray.com/plippe/sbt/sbt-scoverage-github/_latestVersion]
+[![Version](https://api.bintray.com/packages/plippe/sbt/sbt-scoverage-github/images/download.svg)](https://bintray.com/plippe/sbt/sbt-scoverage-github/_latestVersion)
 
 Sbt plugin to summarize [scoverage](http://scoverage.org/) reports, and post it on github pull request as a comment.
 The plugin uses the git remote url to find the repository, and the commit sha for the pull request.
