@@ -10,11 +10,11 @@ bintrayOrganization in bintray := None
 enablePlugins(GitVersioning)
 git.useGitDescribe := true
 
-scalaVersion := "2.12.4"
-crossSbtVersions := Vector("0.13.17", "1.1.1")
+scalaVersion := "2.12.7"
+crossSbtVersions := Vector("0.13.17", "1.2.3")
 
 val github4sVersion = "0.15.0" // java.lang.AbstractMethodError for anything above
-val utestVersion = "0.6.3"
+val utestVersion = "0.6.6"
 val scoverageVersion = "1.3.1"
 
 libraryDependencies ++= Seq(
