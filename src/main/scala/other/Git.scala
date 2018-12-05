@@ -3,6 +3,9 @@ package com.github.plippe
 import sys.process._
 import scala.util.Try
 
+import com.github.plippe.implicits._
+trait Scala212_Git { avoidUnusedImport() }
+
 case object Git {
 
     def remoteUrl(remoteName: String): Either[Throwable, String] = {

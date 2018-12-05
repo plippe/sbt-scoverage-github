@@ -5,6 +5,9 @@ import scala.util.Try
 import scoverage.Coverage
 import scoverage.report.{ ScoverageXmlReader => OfficialScoverageXmlReader }
 
+import com.github.plippe.implicits._
+trait Scala212_Scoverage { avoidUnusedImport() }
+
 object ScoverageXmlReader {
     def read(file: File): Either[Throwable, Coverage] = Try(OfficialScoverageXmlReader.read(file)).toEither
 }

@@ -25,7 +25,7 @@ object ScoverageGithubPlugin extends AutoPlugin {
   def scoverageGithubProjectSettings: Seq[Setting[_]] = Seq(
     gitHubRemoteName := "origin",
     gitHubToken := Properties.envOrNone("GITHUB_TOKEN"),
-    scoverageGitHubPost := post.value,
+    scoverageGitHubPost := post.value
   )
 
   def post = Def.task {
