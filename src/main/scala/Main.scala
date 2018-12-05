@@ -12,6 +12,9 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.Properties
 import scalaj.http.HttpResponse
 
+import com.github.plippe.implicits._
+trait Scala212_Main { avoidUnusedImport() }
+
 object Main {
     def main(args: Array[String]): Unit = {
         val namedFiles = Map(
